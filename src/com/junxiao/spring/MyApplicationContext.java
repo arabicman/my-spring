@@ -2,6 +2,7 @@ package com.junxiao.spring;
 
 import com.junxiao.spring.annotation.Component;
 import com.junxiao.spring.annotation.ComponentScan;
+import com.junxiao.spring.annotation.Scope;
 
 import java.io.File;
 import java.net.URL;
@@ -38,13 +39,21 @@ public class MyApplicationContext {
                     if (fileName.endsWith(".class")) {
                         String className = fileName.substring(fileName.indexOf("com"), fileName.indexOf(".class"));
                         className = className.replace("\\", ".");
-                        System.out.println(className);
-
+                        //System.out.println(className);
                         try {
                             Class<?> clazz = classLoader.loadClass(className);
-
                             if (clazz.isAnnotationPresent(Component.class)) {
-                                //bean class
+                                //BeanDefinition
+                                BeanDefinition beanDefinition = new BeanDefinition();
+                                beanDefinition.setType(clazz);
+                                if (clazz.isAnnotationPresent(Scope.class)) {
+                                    Scope scopeAnnotation = clazz.getAnnotation(Scope.class);
+                                    beanDefinition.setScope(scopeAnnotation.value());
+                                } else {
+                                    beanDefinition.setScope("singleton");
+                                }
+
+
                             }
                         } catch (ClassNotFoundException e) {
                             e.printStackTrace();
