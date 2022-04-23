@@ -51,6 +51,7 @@ public class MyApplicationContext {
                                     beanDefinition.setScope(scopeAnnotation.value());
                                 } else {
                                     beanDefinition.setScope("singleton");
+
                                 }
 
 
