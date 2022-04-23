@@ -1,6 +1,10 @@
 package com.junxiao.spring;
 
+import com.junxiao.spring.annotation.Component;
 import com.junxiao.spring.annotation.ComponentScan;
+
+import java.io.File;
+import java.net.URL;
 
 /***
  * Spring容器类
@@ -11,8 +15,45 @@ public class MyApplicationContext {
 
     public MyApplicationContext(Class configClass) {
         this.configClass = configClass;
-        //扫描注解
+        //检查配置类是否有@ComponentScan注解
         if (configClass.isAnnotationPresent(ComponentScan.class)) {
+            //如果有，获取扫描路径
+            ComponentScan componentScanAnnotation = (ComponentScan) configClass.getAnnotation(ComponentScan.class);
+            String path = componentScanAnnotation.value(); //扫描路径 "com.junxiao.service"
+            String pathStr = path.replace(".", "/"); //相对路径 "com/junxiao/service"
+
+            ClassLoader classLoader = MyApplicationContext.class.getClassLoader();
+            URL resource = classLoader.getResource(pathStr);//传入相对路径,并获取绝对路径
+
+            File file = new File(resource.getFile());
+            //System.out.println(file);
+
+            if (file.isDirectory()) {
+                File[] files = file.listFiles();
+
+                for (File f : files) {
+                    String fileName = f.getAbsolutePath();
+                    //System.out.println(fileName);
+
+                    if (fileName.endsWith(".class")) {
+                        String className = fileName.substring(fileName.indexOf("com"), fileName.indexOf(".class"));
+                        className = className.replace("\\", ".");
+                        System.out.println(className);
+
+                        try {
+                            Class<?> clazz = classLoader.loadClass(className);
+
+                            if (clazz.isAnnotationPresent(Component.class)) {
+                                //bean class
+                            }
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+            }
+
 
         }
     }
